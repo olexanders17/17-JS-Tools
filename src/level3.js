@@ -1,3 +1,5 @@
+
+
 function Ajax(params) {
 
     this.method;
