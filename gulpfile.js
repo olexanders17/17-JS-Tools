@@ -6,13 +6,19 @@ var concat = require('gulp-concat');
 var uglify = require('gulp-uglify');
 var pump = require('pump');
 const del = require('del');
+var rename = require("gulp-rename");
+var livereload = require('gulp-livereload');
+var connect = require('gulp-connect');
+
+gulp.task('connect', function () {
+    connect.server({root: "app", livereload: true});
+});
 
 gulp.task('del', function () {
     del(['./app/**/']).then(function (paths) {
         //return console.log('Deleted files and folders:\n', paths.join('\n'));
     });
 });
-
 
 del(['./app/*.*']).then(function (paths) {
     return console.log('Deleted files and folders:\n', paths.join('\n'));
@@ -30,13 +36,11 @@ gulp.task('sass', function () {
         .pipe(gulp.dest('./app/css'));
 });
 
-
 gulp.task('copy', function () {
     gulp.src('./src/*.html')
         .pipe(gulpCopy('./app/'));
 
 });
-
 
 gulp.task('concat', function () {
     return gulp.src(['./src/other.js', './src/level3.js'])
@@ -56,33 +60,52 @@ gulp.task('compress', function () {
 //dd task ‘prod’, which should delete folder ‘prod’ (if exists),
 // create folder ‘prod’,
 // copy index.html,
-// copy compiled css file to ‘prod/css/styles.css’, copy and minify all js code (including libs) to 1 file ‘prod/js/app.js’
+// copy compiled css file to ‘prod/css/styles.css’,
 
+// copy and minify all js code
 
-gulp.task("hello",function () {
-    console.log("hello world");
-})
+// (including libs) to 1 file ‘prod/js/app.js’
 
 
 gulp.task('prod', function () {
-    del(['./prod/*.*']).then(function (paths) { });
+    del(['./prod/**/*.*']).then(function (paths) {
+    });
 
-    gulp.src(['./src/*.html','!/.src/'])
-        .pipe(gulpCopy('./prod'));
+    gulp.src('./src/*.{html,htm}')
+        .pipe(gulp.dest('./prod'));
 
     gulp.src('./src/**/*.sass')
         .pipe(sass().on('error', sass.logError))
         .pipe(gulp.dest('./prod/css/'));
+
+    gulp.src("./prod/css/main.css")
+        .pipe(rename("./prod/css/style.css"))
+        .pipe(gulp.dest(""));
+
+    pump([
+            gulp.src('src/*.js'),
+            uglify(),
+            gulp.dest('./prod/')
+        ]
+    );
+
+    gulp.src(['./src/lib/*.js'])
+        .pipe(concat('app.js'))
+        .pipe(gulp.dest('./prod/js/'))
+        .pipe(livereload());
+
+
 });
 
-
-
-
-
-
-/*
 gulp.task('watch', function () {
-    gulp.watch('./src/!**', ['prod']);
+    gulp.watch('./src/**/*.*', ['prod']);
 })
-*/
 
+
+gulp.task("asd",function () {
+    gulp
+        .pipe(function () {
+            console.log("I am in asd");
+        })
+
+})
