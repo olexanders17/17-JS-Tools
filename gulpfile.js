@@ -60,40 +60,44 @@ gulp.task('compress', function () {
 //dd task ‘prod’, which should delete folder ‘prod’ (if exists),
 // create folder ‘prod’,
 // copy index.html,
+
 // copy compiled css file to ‘prod/css/styles.css’,
 
 // copy and minify all js code
-
 // (including libs) to 1 file ‘prod/js/app.js’
 
 
 gulp.task('prod', function () {
-    del(['./prod/**/*.*']).then(function (paths) {
-    });
+    //delete
+    del.sync(['./prod/**/']);
 
+    //copy html
     gulp.src('./src/*.{html,htm}')
         .pipe(gulp.dest('./prod'));
 
-    gulp.src('./src/**/*.sass')
+    //compile to css
+    gulp
+        .src('./src/**/*.sass')
         .pipe(sass().on('error', sass.logError))
-        .pipe(gulp.dest('./prod/css/'));
+        .pipe(rename("style.css"))
+        .pipe(gulp.dest('./prod/css/'))
+
 
     gulp.src("./prod/css/main.css")
-        .pipe(rename("./prod/css/style.css"))
-        .pipe(gulp.dest(""));
+    //.pipe(rename("./prod/css/style.css"))
+    //gulp.src('./prod/css/style.css"')
+        .pipe(gulp.dest('./prod/css/style.css'));
 
     pump([
-            gulp.src('src/*.js'),
-            uglify(),
-            gulp.dest('./prod/')
-        ]
-    );
+        gulp.src('./src/*.js'),
+        uglify(),
+        gulp.dest('./prod/')
+    ]);
 
     gulp.src(['./src/lib/*.js'])
         .pipe(concat('app.js'))
         .pipe(gulp.dest('./prod/js/'))
         .pipe(livereload());
-
 
 });
 
@@ -102,7 +106,7 @@ gulp.task('watch', function () {
 })
 
 
-gulp.task("asd",function () {
+gulp.task("asd", function () {
     gulp
         .pipe(function () {
             console.log("I am in asd");
